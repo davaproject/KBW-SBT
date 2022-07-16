@@ -3,8 +3,9 @@ pragma solidity ^0.8.14;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC721, ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import {Operable} from "./Operable.sol";
 
-contract SBT is ERC721URIStorage, Ownable {
+contract SBT is ERC721URIStorage, Ownable, Operable {
     uint256 private _totalIssuedTokenAmount;
     uint256 private _totalBurntTokenAmount;
 
@@ -12,7 +13,10 @@ contract SBT is ERC721URIStorage, Ownable {
         ERC721(_name, _symbol)
     {}
 
-    function mint(address _receiver, string calldata _tokenURI) external {
+    function mint(address _receiver, string calldata _tokenURI)
+        external
+        onlyOperator
+    {
         _safeMint(_receiver, _totalIssuedTokenAmount);
         _setTokenURI(_totalIssuedTokenAmount, _tokenURI);
         _totalIssuedTokenAmount += 1;
@@ -49,5 +53,16 @@ contract SBT is ERC721URIStorage, Ownable {
         uint256
     ) internal pure override {
         revert("Can not transfer SBT");
+    }
+
+    /**
+        @dev Operable Role
+     */
+    function grantOperatorRole(address _candidate) external onlyOwner {
+        _grantOperatorRole(_candidate);
+    }
+
+    function revokeOperatorRole(address _candidate) external onlyOwner {
+        _grantOperatorRole(_candidate);
     }
 }
