@@ -10,6 +10,9 @@ contract SBT is ERC721URIStorage, Ownable, Operable {
     uint256 private _totalIssuedTokenAmount;
     uint256 private _totalBurntTokenAmount;
 
+    event Attest(address indexed to, uint256 indexed tokenId);
+    event Revoke(address indexed to, uint256 indexed tokenId);
+
     constructor(string memory _name, string memory _symbol)
         ERC721(_name, _symbol)
     {}
@@ -20,6 +23,8 @@ contract SBT is ERC721URIStorage, Ownable, Operable {
     {
         _safeMint(_receiver, _totalIssuedTokenAmount);
         _setTokenURI(_totalIssuedTokenAmount, _tokenURI);
+        emit Attest(_receiver, _totalIssuedTokenAmount);
+
         _totalIssuedTokenAmount += 1;
     }
 
@@ -29,6 +34,8 @@ contract SBT is ERC721URIStorage, Ownable, Operable {
             "Caller is not token owner nor approved"
         );
         _burn(_tokenId);
+        emit Revoke(_msgSender(), _tokenId);
+
         _totalBurntTokenAmount += 1;
     }
 
