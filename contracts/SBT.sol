@@ -2,7 +2,8 @@
 pragma solidity ^0.8.14;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ERC721, ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import {IERC721Metadata, ERC721, ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {Operable} from "./Operable.sol";
 
 contract SBT is ERC721URIStorage, Ownable, Operable {
@@ -37,6 +38,17 @@ contract SBT is ERC721URIStorage, Ownable, Operable {
 
     function totalSupply() public view returns (uint256) {
         return _totalIssuedTokenAmount + _totalBurntTokenAmount;
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721)
+        returns (bool)
+    {
+        return
+            interfaceId == type(IERC721Metadata).interfaceId ||
+            interfaceId == type(IERC165).interfaceId;
     }
 
     function approve(address, uint256) public pure override {
