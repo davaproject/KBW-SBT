@@ -1,0 +1,11 @@
+{
+  "name": "KBW-SBT",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:davaproject/KBW-SBT.git",
+  "author": "ggomma <ggomma@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.7.0"
+  }
+}
