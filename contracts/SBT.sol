@@ -2,17 +2,15 @@
 pragma solidity ^0.8.14;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {IERC721Metadata, ERC721, ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import {IERC721, IERC721Metadata, ERC721, ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {Operable} from "./Operable.sol";
 import {ERC5192} from "./ERC5192/ERC5192.sol";
+import {IERC4973} from "./ERC4973/IERC4973.sol";
 
-contract SBT is ERC5192, ERC721URIStorage, Ownable, Operable {
+contract SBT is IERC4973, ERC721URIStorage, ERC5192, Ownable, Operable {
     uint256 private _totalIssuedTokenAmount;
     uint256 private _totalBurntTokenAmount;
-
-    event Attest(address indexed to, uint256 indexed tokenId);
-    event Revoke(address indexed to, uint256 indexed tokenId);
 
     constructor(string memory _name, string memory _symbol)
         ERC721(_name, _symbol)
@@ -45,6 +43,24 @@ contract SBT is ERC5192, ERC721URIStorage, Ownable, Operable {
         return true;
     }
 
+    function balanceOf(address owner)
+        public
+        view
+        override(IERC4973, ERC721)
+        returns (uint256)
+    {
+        return super.balanceOf(owner);
+    }
+
+    function ownerOf(uint256 tokenId)
+        public
+        view
+        override(IERC4973, ERC721)
+        returns (address)
+    {
+        return super.ownerOf(tokenId);
+    }
+
     function totalIssuedTokens() public view returns (uint256) {
         return _totalIssuedTokenAmount;
     }
@@ -59,9 +75,13 @@ contract SBT is ERC5192, ERC721URIStorage, Ownable, Operable {
         override(ERC721, ERC5192)
         returns (bool)
     {
+        if (interfaceId == type(IERC721).interfaceId) {
+            return false;
+        }
         return
             interfaceId == type(IERC721Metadata).interfaceId ||
             interfaceId == type(IERC165).interfaceId ||
+            interfaceId == type(IERC4973).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
