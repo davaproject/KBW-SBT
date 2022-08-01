@@ -5,8 +5,9 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC721Metadata, ERC721, ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {Operable} from "./Operable.sol";
+import {ERC5192} from "./ERC5192/ERC5192.sol";
 
-contract SBT is ERC721URIStorage, Ownable, Operable {
+contract SBT is ERC5192, ERC721URIStorage, Ownable, Operable {
     uint256 private _totalIssuedTokenAmount;
     uint256 private _totalBurntTokenAmount;
 
@@ -39,6 +40,11 @@ contract SBT is ERC721URIStorage, Ownable, Operable {
         _totalBurntTokenAmount += 1;
     }
 
+    function locked(uint256 tokenId) external view override returns (bool) {
+        require(_exists(tokenId), "ERC5192: token does not exists");
+        return true;
+    }
+
     function totalIssuedTokens() public view returns (uint256) {
         return _totalIssuedTokenAmount;
     }
@@ -50,12 +56,22 @@ contract SBT is ERC721URIStorage, Ownable, Operable {
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721)
+        override(ERC721, ERC5192)
         returns (bool)
     {
         return
             interfaceId == type(IERC721Metadata).interfaceId ||
-            interfaceId == type(IERC165).interfaceId;
+            interfaceId == type(IERC165).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (string memory)
+    {
+        return ERC721URIStorage.tokenURI(tokenId);
     }
 
     function approve(address, uint256) public pure override {
@@ -64,6 +80,14 @@ contract SBT is ERC721URIStorage, Ownable, Operable {
 
     function setApprovalForAll(address, bool) public pure override {
         revert("Can not approve SBT");
+    }
+
+    function _burn(uint256 tokenId)
+        internal
+        virtual
+        override(ERC721, ERC721URIStorage)
+    {
+        ERC721URIStorage._burn(tokenId);
     }
 
     function _transfer(
